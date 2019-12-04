@@ -20,6 +20,7 @@ require(
 		"dojo/text",
 		"dojo/html",
 		"dojo/_base/event",
+		"MxSVG/lib/jquery-1.11.2",
 		"dojo/text!MxSVG/widget/template/MxSVG.html"
 	],
 	function(
@@ -38,8 +39,12 @@ require(
 		dojoText,
 		dojoHtml,
 		dojoEvent,
+		_jQuery,
 		widgetTemplate
 	){
+		"use strict";
+		var $ = _jQuery.noConflict(true);
+		window.$=$;
 		return declare(
 			"MxSVG.widget.MxSVG",
 			[
@@ -51,6 +56,10 @@ require(
 				widgetBase:null,
 				_handles:null,
 				_contextObj:null,
+				str_click_mf:null,
+				str_click_entity:null,
+				str_click_entity_attr:null,
+				str_click_assoc:null,
 				constructor: function () {
 					this._handles = [];
 				},
@@ -58,6 +67,23 @@ require(
 				},
 				update: function (obj, callback) {
 					this._contextObj = obj;
+					if(this.dom_svg==null){
+						this.dom_svg=dojo.create(
+							'div',
+							{
+								'id':this.id+'_svgdiv'
+							}
+						);
+						this.domNode.appendChild(this.dom_svg);
+						dojo.connect(
+							this.dom_svg,
+							'click',
+							dojo.hitch(this,function(tgt){
+								this.clickElement(tgt);
+							})
+						);
+					}
+
 					this._updateRendering(callback);
 				},
 				resize: function (box) {
@@ -70,28 +96,63 @@ require(
 					if (this._contextObj !== null) {
 						this.loaded=true;
 						var fileurl="/file?guid="+this._contextObj.getGuid()+"&changeDate="+(new Date().getTime());
-						if(this.dom_svg==null){
-							this.dom_svg=dojo.create(
-								'img',
-								{}
-							);
-							this.domNode.appendChild(this.dom_svg);
-						}
 						this.dom_svg.src=fileurl;
+						$(this.dom_svg).load(fileurl);
 						dojoStyle.set(this.domNode, "display", "block");
 					} else {
 						dojoStyle.set(this.domNode, "display", "none");
-						if(this.dom_svg==null){
-							this.dom_svg=dojo.create(
-								'img',
-								{}
-							);
-							this.domNode.appendChild(this.dom_svg);
-						}
-						this.dom_svg.src='';
-
+						dojo.empty(this.dom_svg);
 					}
 					this._executeCallback(callback, "_updateRendering");
+				},
+				clickElement:function(tgt){
+					if(tgt!=null){
+						new Promise((resolve,reject)=>{
+							if(this.obj_click==null){
+								if(
+									this.str_click_mf!=null&&
+									this.str_click_entity!=null&&
+									this.str_click_entity_attr!=null&&
+									this.str_click_assoc!=null
+								){
+									mx.data.create(
+										{
+											entity:this.str_click_entity,
+											callback:dojo.hitch(this,function(obj){
+												obj.addReference(
+													this.str_click_assoc,
+													this._contextObj.getGuid()
+												);
+												resolve(obj)
+											}),
+											error:dojo.hitch(this,function(e){
+												reject(e);
+											})
+										}
+									);
+								}else{
+									reject('Invalid interaction attributes');
+								}
+							}else{
+								resolve(obj_click);
+							}
+						})
+						.then(
+							dojo.hitch(this,function(obj){
+								var tgtclass=$(tgt.target).attr('class');
+								if(tgtclass!=null){
+									obj.set(this.str_click_entity_attr,$(tgt.target).attr('class'));
+									this._execMf(this.str_click_mf,obj.getGuid(),dojo.hitch(this,function(ret){}))
+								}else{
+								}
+							}),
+							dojo.hitch(this,function(err){
+								console.error(err);
+							})
+						)
+					}else{
+					}
+
 				},
 				_execMf: function (mf, guid, cb) {
 					if (mf && guid) {
