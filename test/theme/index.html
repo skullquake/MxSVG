@@ -25,7 +25,7 @@
         <script>
             dojoConfig = {
                 baseUrl: "mxclientsystem/dojo/",
-                cacheBust: "{{cachebust}}",
+                cacheBust: new Date().getTime(),//"{{cachebust}}",
                 rtlRedirect: "index-rtl.html"
             };
         </script>

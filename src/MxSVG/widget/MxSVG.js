@@ -68,16 +68,29 @@ require(
 				},
 				_updateRendering: function (callback) {
 					if (this._contextObj !== null) {
-						if(!this.loaded){
-							this.loaded=true;
-							var fileurl="/file?guid="+this._contextObj.getGuid()+"&changeDate="+(new Date().getTime());
-						}else{
+						this.loaded=true;
+						var fileurl="/file?guid="+this._contextObj.getGuid()+"&changeDate="+(new Date().getTime());
+						if(this.dom_svg==null){
+							this.dom_svg=dojo.create(
+								'img',
+								{}
+							);
+							this.domNode.appendChild(this.dom_svg);
 						}
+						this.dom_svg.src=fileurl;
 						dojoStyle.set(this.domNode, "display", "block");
 					} else {
 						dojoStyle.set(this.domNode, "display", "none");
-					}
+						if(this.dom_svg==null){
+							this.dom_svg=dojo.create(
+								'img',
+								{}
+							);
+							this.domNode.appendChild(this.dom_svg);
+						}
+						this.dom_svg.src='';
 
+					}
 					this._executeCallback(callback, "_updateRendering");
 				},
 				_execMf: function (mf, guid, cb) {
