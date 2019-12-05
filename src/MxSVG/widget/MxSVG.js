@@ -185,12 +185,12 @@ require(
 */
 						},
 						zoomIn:function(){
-							this.svg.zoom(this.int_zoomLvl);
 							this.int_zoomLvl+=this.int_zoomInc;
+							this.svg.zoom(this.int_zoomLvl);
 						},
 						zoomOut:function(){
-							this.svg.zoom(this.int_zoomLvl);
 							this.int_zoomLvl-=this.int_zoomInc;
+							this.svg.zoom(this.int_zoomLvl);
 						},
 						zoomReset:function(){
 							this.int_zoomLvl=this.int_zoomLvlOriginal;
