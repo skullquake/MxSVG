@@ -1,4 +1,9 @@
 test/javasource/
+test/deployment/build_core.xml
+test/deployment/log
+test/deployment/model
+test/deployment/run
+test/deployment/web
 test/.classpath
 test/.project
 test/userlib/
