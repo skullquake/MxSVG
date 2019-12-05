@@ -1,0 +1,1 @@
+define(["MxSVG/widget/MxSVG", "MobileFeatures/widget/MobileFeatures"], {});

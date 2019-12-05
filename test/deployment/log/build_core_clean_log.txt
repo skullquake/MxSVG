@@ -1,0 +1,8 @@
+Buildfile: c:\Users\ockert\dev\mdx\wid\svg\test\deployment\build_core.xml
+
+clean:
+
+BUILD SUCCESSFUL
+Total time: 1 second
+
+
