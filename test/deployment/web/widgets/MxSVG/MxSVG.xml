@@ -58,10 +58,16 @@
 			<description>Data Entity Fill Attribute</description>
 		</property>
 
-		<property key="str_highlightcolor" type="string" required="false" defaultValue="rgba(0,255,0,0.5)">
-			<caption>Highlight Color</caption>
-			<category>Interaction</category>
+		<property key="str_highlightcolor_correlated" type="string" required="false" defaultValue="rgba(0,255,0,0.5)">
+			<caption>Highlight Color Correlated</caption>
+			<category>UX</category>
 			<description>Highlight Color for Correlated Elements</description>
 		</property>
+		<property key="str_highlightcolor_uncorrelated" type="string" required="false" defaultValue="rgba(255,0,0,0.5)">
+			<caption>Highlight Color Uncorrelated</caption>
+			<category>UX</category>
+			<description>Highlight Color for Uncorrelated Elements</description>
+		</property>
+
 	</properties>
 </widget>
