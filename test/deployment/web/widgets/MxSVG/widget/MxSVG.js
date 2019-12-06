@@ -112,6 +112,7 @@ require(
 						int_zoomLvl:1,
 						int_zoomLvlOriginal:null,
 						int_zoomInc:1,
+						_objectChangeHandler:null,
 						//------------------------------
 						dom_btngroup:null,
 						dom_btnzoomin:null,
@@ -124,6 +125,20 @@ require(
 						postCreate:function(){
 						},
 						update:function(obj,callback){
+							if(this._objectChangeHandler !== null) {
+								this.unsubscribe(this._objectChangeHandler);
+							}
+							if(obj){
+								this._objectChangeHandler = this.subscribe({
+								guid: obj.getGuid(),
+								callback:dojo.hitch(this, function () {
+									this._updateRendering(callback);
+								})
+							});
+							}else{}
+			
+
+
 							this._contextObj=obj;
 							if(this.dom_svg==null){
 								this.dom_svg=dojo.create(
@@ -158,8 +173,8 @@ require(
 
 
 							}
-
 							this._updateRendering(callback);
+							this._executeCallback(callback, "update");
 						},
 						resize: function (box) {
 						},
