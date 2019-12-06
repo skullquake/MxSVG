@@ -5965,6 +5965,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 .mx-groupbox{
     border:unset;
     border-radius:unset;
+  margin-bottom:8px;
 }
 .mx-groupbox > .mx-groupbox-header {
     margin: 0;
@@ -5986,7 +5987,18 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     border-top-color: unset;
     background-color: #252c36;
     border:unset;
+    background: #1f2730;
+  border-radius:unset!important;
 }
+
+
+
+
+
+
+
+
+
 .mx-tabcontainer .mx-tabcontainer-tabs {
     margin-bottom: 20px;
     border-color: #252c36;
@@ -7372,4 +7384,8 @@ cursor:url(
 .table > tbody > tr.info > td, .table > tbody > tr.info > th, .table > tbody > tr > td.info, .table > tbody > tr > th.info, .table > tfoot > tr.info > td, .table > tfoot > tr.info > th, .table > tfoot > tr > td.info, .table > tfoot > tr > th.info, .table > thead > tr.info > td, .table > thead > tr.info > th, .table > thead > tr > td.info, .table > thead > tr > th.info {
     background-color: 
     #323277b0;
+}
+
+.compact-picker{
+	background:#36404e;!important
 }
