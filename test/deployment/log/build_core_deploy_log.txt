@@ -4,6 +4,5 @@ deploy:
      [copy] Copying 46 files to c:\Users\ockert\dev\mdx\wid\svg\test\deployment
 
 BUILD SUCCESSFUL
-Total time: 1 second
-
+Total time: 0 seconds
 
