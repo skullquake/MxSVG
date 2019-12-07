@@ -31,6 +31,17 @@
 			<description>Double Click Timeout in Milliseconds</description>
 		</property>
 
+		<property key="str_hover_mf" type="string" required="false">
+			<caption>Hover MF</caption>
+			<category>Interaction</category>
+			<description>Fully Qualified Hover Microflow.</description>
+		</property>
+		<property key="int_hoverTimeout" type="integer" required="true" defaultValue="250">
+			<caption>Hover Timeout</caption>
+			<category>Interaction</category>
+			<description>Hover Timeout in Milliseconds</description>
+		</property>
+
 		<property key="str_click_entity" type="string" required="false">
 			<caption>Click Entity</caption>
 			<category>Interaction</category>

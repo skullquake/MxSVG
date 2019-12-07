@@ -7,5 +7,6 @@ package:
       [jar] Building jar: c:\Users\ockert\dev\mdx\wid\svg\test\deployment\model\bundles\project.jar
 
 BUILD SUCCESSFUL
-Total time: 3 seconds
+Total time: 6 seconds
+
 

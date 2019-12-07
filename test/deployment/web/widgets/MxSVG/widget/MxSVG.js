@@ -70,6 +70,7 @@ require(
 				str_click_left_double_mf:null,
 				str_click_right_single_mf:null,
 				str_click_right_double_mf:null,
+				str_hover_mf:null,
 				//------------------------------
 				str_click_entity:null,
 				str_click_entity_id_attr:null,
@@ -237,11 +238,31 @@ require(
 										null
 									);
 									//d3 remove context menu
-									this.svg.on('contextmenu',
+									this.svg
+									.on('contextmenu',
 										function(){ 
 											d3.event.preventDefault();
 										}
 									);
+									//apply hover...do in dojo...
+									/*
+									this.svg
+									.on(
+										"mouseover",
+										dojo.hitch(this,function(d){
+											console.log('mouseover');
+											console.log(d);
+											//this.hover(d);
+										})
+									)
+									.on(
+										"mouseout",function(d){
+											console.log('mouseout');
+											console.log(d);
+											//this.hover(d);
+										}
+									);
+									*/
 									//setup data entities
 									new Promise((resolve,reject)=>{
 										mx.data.get({
@@ -335,6 +356,8 @@ require(
 																mouse.enter,
 																dojo.hitch(this,function(evt){
 																	$(evt.target).css('fill',this.str_highlightcolor_correlated);
+																	//handle hover server exec here...
+																	this.hover(evt);
 																})
 															));
 															this.arr_evt.push(on(
@@ -407,27 +430,31 @@ require(
 					this._executeCallback(callback,"_updateRendering");
 				},
 				clickLMBS:function(e){
-					console.log('LMBS')
 					this.clickElement(e,this.str_click_left_single_mf);
 				},
 				clickLMBD:function(e){
-					console.log('LMBD')
 					this.clickElement(e,this.str_click_left_double_mf);
 				},
 				clickRMBS:function(e){
-					console.log('RMBS')
 					this.clickElement(e,this.str_click_right_single_mf);
 				},
 				clickRMBD:function(e){
-					console.log('RMBD')
 					this.clickElement(e,this.str_click_right_double_mf);
+				},
+				hover:function(e){
+					//--------------------------------------------------------------------------------
+					//IMPORTANT:
+					//implement solution for overzealous serverside execution via frontend interaction
+					//--------------------------------------------------------------------------------
+					this.clickElement(e,this.str_hover_mf);
+					//--------------------------------------------------------------------------------
 				},
 				clickElement:function(e,str_mf){
 					if(e!=null){
 						new Promise((resolve,reject)=>{
 							if(this.obj_click==null){
 								if(
-									str_mf!=null&&//this.str_click_left_single_mf!=null&&
+									str_mf!=null&&
 									this.str_click_entity!=null&&
 									!(
 										this.str_click_entity_id_attr==null&&
