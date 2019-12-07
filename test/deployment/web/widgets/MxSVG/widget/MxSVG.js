@@ -53,7 +53,7 @@ require(
 		widgetTemplate
 	){
 		"use strict";
-		var $ = _jQuery.noConflict(true);
+		var $=_jQuery.noConflict(true);
 		return declare(
 			"MxSVG.widget.MxSVG",
 			[
@@ -66,7 +66,10 @@ require(
 				_handles:null,
 				_contextObj:null,
 				//------------------------------
-				str_click_mf:null,
+				str_click_left_single_mf:null,
+				str_click_left_double_mf:null,
+				str_click_right_single_mf:null,
+				str_click_right_double_mf:null,
 				//------------------------------
 				str_click_entity:null,
 				str_click_entity_id_attr:null,
@@ -86,11 +89,19 @@ require(
 				arr_nod_correlated:[],
 				arr_nod_uncorrelated:[],
 				_objectChangeHandler:null,
+				arr_evt:[],
+				bool_alreadyClicked:null,
+				int_doubleClickTimeout:250,
 				//------------------------------
 				constructor:function(){
 					this._handles=[];
 				},
 				postCreate:function(){
+					this.int_doubleClickTimeout=
+						int_doubleClickTimeout==null?
+						250:
+						this.int_doubleClickTimeout
+					;
 				},
 				update:function(obj,callback){
 					if(this._objectChangeHandler!==null) {
@@ -113,13 +124,79 @@ require(
 							}
 						);
 						this.domNode.appendChild(this.dom_svg);
-						dojo.connect(
+						//push lmbs
+						this.arr_evt.push(dojo.connect(
 							this.dom_svg,
-							'click',
-							dojo.hitch(this,function(tgt){
-								this.clickElement(tgt);
+							['click'],
+							dojo.hitch(this,function(e){
+								this.bool_alreadyClicked=
+									this.bool_alreadyClicked==null?
+									false:
+									this.bool_alreadyClicked
+								;
+								if(e.detail===1){
+										window.setTimeout(
+											dojo.hitch(
+												this,
+												function(){
+													if(!this.bool_alreadyClicked){
+														this.bool_alreadyClicked=true;
+														this.clickLMBS(e);
+														this.bool_alreadyClicked=false;
+													}
+												}
+											),
+											this.int_doubleClickTimeout
+										);
+								}else if(e.detail===2){
+									this.bool_alreadyClicked=true;
+									this.clickLMBD(e);
+									window.setTimeout(
+										dojo.hitch(
+											this,
+											function(){
+												this.bool_alreadyClicked=false;
+											}
+										),
+										this.int_doubleClickTimeout
+									);
+								}
 							})
-						);
+						));
+						//push rmb
+						this.arr_evt.push(dojo.connect(
+							this.dom_svg,
+							['mousedown'],
+							dojo.hitch(this,function(e){
+								if(e.detail===1){
+									window.setTimeout(
+										dojo.hitch(
+											this,
+											function(){
+												if(!this.bool_alreadyClicked){
+													this.bool_alreadyClicked=true;
+													this.clickRMBS(e);
+													this.bool_alreadyClicked=false;
+												}
+											}
+										),
+										this.int_doubleClickTimeout
+									);
+								}else if(e.detail===2){
+									this.bool_alreadyClicked=true;
+									this.clickRMBD(e);
+									window.setTimeout(
+										dojo.hitch(
+											this,
+											function(){
+												this.bool_alreadyClicked=false;
+											}
+										),
+										this.int_doubleClickTimeout
+									);
+								}
+							})
+						));
 					}
 					this._updateRendering(callback);
 					this._executeCallback(callback, "update");
@@ -129,6 +206,7 @@ require(
 				uninitialize: function () {
 				},
 				destroy:function () {
+					console.log(this.evt);//make sure events are cleaned up
 				},
 				_updateRendering:function(callback){
 					if(this._contextObj!==null){
@@ -145,6 +223,7 @@ require(
 									d3.select(this.dom_svg).node().append(data.documentElement)
 									this.svg=d3.select(dojo.query('svg',this.dom_svg)[0]);
 									var svg=this.svg;
+									//setup d3 zoom
 									this.svg
 										.attr("width","100%")
 										.attr("height","100%")
@@ -152,6 +231,17 @@ require(
 											svg.attr("transform",d3.event.transform)
 										}))
 										.append("g")
+									//no d3 zoom on double click (https://bl.ocks.org/anonymous/42745557a8602692d9dc98c33a327d29)
+									this.svg.on(
+										"dblclick.zoom",
+										null
+									);
+									//d3 remove context menu
+									this.svg.on('contextmenu',
+										function(){ 
+											d3.event.preventDefault();
+										}
+									);
 									//setup data entities
 									new Promise((resolve,reject)=>{
 										mx.data.get({
@@ -240,20 +330,20 @@ require(
 														arr_nod_query.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
 															this.arr_nod_correlated.push(obj_nod);
 															obj_nod.oldfill=$(obj_nod).css('fill');
-															on(
+															this.arr_evt.push(on(
 																obj_nod,
 																mouse.enter,
 																dojo.hitch(this,function(evt){
 																	$(evt.target).css('fill',this.str_highlightcolor_correlated);
 																})
-															);
-															on(
+															));
+															this.arr_evt.push(on(
 																obj_nod,
 																mouse.leave,
 																dojo.hitch(this,function(evt){
 																	$(evt.target).css('fill',evt.target.oldfill);
 																})
-															);
+															));
 
 														}));
 													}
@@ -284,20 +374,20 @@ require(
 													this.arr_nod_uncorrelated.forEach(dojo.hitch(this,function(obj_nod,obj_nodidx){
 														//$(nod).css('fill','yellow');
 														obj_nod.oldfill=$(obj_nod).css('fill');
-														on(
+														this.arr_evt.push(on(
 															obj_nod,
 															mouse.enter,
 															dojo.hitch(this,function(evt){
 																$(evt.target).css('fill',this.str_highlightcolor_uncorrelated);
 															})
-														);
-														on(
+														));
+														this.arr_evt.push(on(
 															obj_nod,
 															mouse.leave,
 															dojo.hitch(this,function(evt){
 																$(evt.target).css('fill',evt.target.oldfill);
 															})
-														);
+														));
 													}));
 												}else{
 												}
@@ -307,26 +397,34 @@ require(
 											alert(err);
 										})
 									);
-
-
-
 								}
 							)
 						);
 					} else {
-						dojoStyle.set(this.domNode, "display", "none");
+						dojoStyle.set(this.domNode,"display","none");
 						dojo.empty(this.dom_svg);
 					}
-					this._executeCallback(callback, "_updateRendering");
+					this._executeCallback(callback,"_updateRendering");
 				},
-				clickElement:function(tgt){
-					if(tgt!=null){
+				clickLMBS:function(e){
+					this.clickElement(e,this.str_click_left_single_mf);
+				},
+				clickLMBD:function(e){
+					this.clickElement(e,this.str_click_left_double_mf);
+				},
+				clickRMBS:function(e){
+					this.clickElement(e,this.str_click_right_single_mf);
+				},
+				clickRMBD:function(e){
+					this.clickElement(e,this.str_click_right_double_mf);
+				},
+				clickElement:function(e,str_mf){
+					if(e!=null){
 						new Promise((resolve,reject)=>{
 							if(this.obj_click==null){
 								if(
-									this.str_click_mf!=null&&
+									str_mf!=null&&//this.str_click_left_single_mf!=null&&
 									this.str_click_entity!=null&&
-									//this.str_click_entity_attr!=null&&
 									!(
 										this.str_click_entity_id_attr==null&&
 										this.str_click_entity_class_attr==null
@@ -358,20 +456,21 @@ require(
 						.then(
 							dojo.hitch(this,function(obj){
 								if(this.str_click_entity_id_attr!=null){
-									var tgtid=$(tgt.target).attr('id');
+									var tgtid=$(e.target).attr('id');
 									if(tgtid!=null){
 										obj.set(this.str_click_entity_id_attr,tgtid);
 									}else{
 									}
 								}
 								if(this.str_click_entity_class_attr!=null){
-									var tgtclass=$(tgt.target).attr('class');
+									var tgtclass=$(e.target).attr('class');
 									if(tgtclass!=null){
 										obj.set(this.str_click_entity_class_attr,tgtclass);
 									}else{
 									}
 								}
-								this._execMf(this.str_click_mf,obj.getGuid(),dojo.hitch(this,function(ret){}))
+								//this._execMf(this.str_click_left_single_mf,obj.getGuid(),dojo.hitch(this,function(ret){}))
+								this._execMf(str_mf,obj.getGuid(),dojo.hitch(this,function(ret){}))
 							}),
 							dojo.hitch(this,function(err){
 								console.error(err);
@@ -379,24 +478,27 @@ require(
 						)
 					}else{
 					}
-
 				},
-				_execMf: function (mf, guid, cb) {
-					if (mf && guid) {
-						mx.ui.action(mf, {
-							params: {
-								applyto: "selection",
-								guids: [guid]
-							},
-							callback: lang.hitch(this, function (objs) {
-								if (cb && typeof cb === "function") {
-									cb(objs);
+				_execMf:function(mf,guid,cb){
+					if(mf&&guid){
+						mx.ui.action(
+							mf,
+							{
+								params: {
+									applyto:"selection",
+									guids:[guid]
+								},
+								callback:lang.hitch(this,function(objs){
+									if(cb&&typeof cb==="function"){
+										cb(objs);
+									}
+								}),
+								error:function(error){
+									console.debug(error.description);
 								}
-							}),
-							error: function (error) {
-								console.debug(error.description);
-							}
-						}, this);
+							},
+							this
+						);
 					}
 				},
 				_executeCallback:function(cb,from){
