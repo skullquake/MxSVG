@@ -407,15 +407,19 @@ require(
 					this._executeCallback(callback,"_updateRendering");
 				},
 				clickLMBS:function(e){
+					console.log('LMBS')
 					this.clickElement(e,this.str_click_left_single_mf);
 				},
 				clickLMBD:function(e){
+					console.log('LMBD')
 					this.clickElement(e,this.str_click_left_double_mf);
 				},
 				clickRMBS:function(e){
+					console.log('RMBS')
 					this.clickElement(e,this.str_click_right_single_mf);
 				},
 				clickRMBD:function(e){
+					console.log('RMBD')
 					this.clickElement(e,this.str_click_right_double_mf);
 				},
 				clickElement:function(e,str_mf){
