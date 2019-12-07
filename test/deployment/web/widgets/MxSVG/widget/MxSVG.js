@@ -108,7 +108,7 @@ require(
 					this.int_hoverTimeout=
 						int_hoverTimeout==null?
 						250:
-						this.int_hoverTimeout_
+						this.int_hoverTimeout
 					;
 
 				},
@@ -444,7 +444,7 @@ require(
 								this.hoverQueue=[];
 							}
 						}),
-						this.hoverTimeout
+						this.int_hoverTimeout
 					);
 					//--------------------------------------------------------------------------------
 				},
