@@ -91,8 +91,10 @@ require(
 				arr_nod_uncorrelated:[],
 				_objectChangeHandler:null,
 				arr_evt:[],
+				arr_hoverQueue:[],
 				bool_alreadyClicked:null,
-				int_doubleClickTimeout:250,
+				int_doubleClickTimeout:null,
+				int_hoverTimeout:null,
 				//------------------------------
 				constructor:function(){
 					this._handles=[];
@@ -103,6 +105,12 @@ require(
 						250:
 						this.int_doubleClickTimeout
 					;
+					this.int_hoverTimeout=
+						int_hoverTimeout==null?
+						250:
+						this.int_hoverTimeout_
+					;
+
 				},
 				update:function(obj,callback){
 					if(this._objectChangeHandler!==null) {
@@ -244,25 +252,6 @@ require(
 											d3.event.preventDefault();
 										}
 									);
-									//apply hover...do in dojo...
-									/*
-									this.svg
-									.on(
-										"mouseover",
-										dojo.hitch(this,function(d){
-											console.log('mouseover');
-											console.log(d);
-											//this.hover(d);
-										})
-									)
-									.on(
-										"mouseout",function(d){
-											console.log('mouseout');
-											console.log(d);
-											//this.hover(d);
-										}
-									);
-									*/
 									//setup data entities
 									new Promise((resolve,reject)=>{
 										mx.data.get({
@@ -356,7 +345,7 @@ require(
 																mouse.enter,
 																dojo.hitch(this,function(evt){
 																	$(evt.target).css('fill',this.str_highlightcolor_correlated);
-																	//handle hover server exec here...
+																	//handle hover server exec
 																	this.hover(evt);
 																})
 															));
@@ -446,7 +435,17 @@ require(
 					//IMPORTANT:
 					//implement solution for overzealous serverside execution via frontend interaction
 					//--------------------------------------------------------------------------------
-					this.clickElement(e,this.str_hover_mf);
+					this.hoverQueue=this.hoverQueue==null?[]:this.hoverQueue;
+					this.hoverQueue.push(e);
+					window.setTimeout(
+						dojo.hitch(this,function(){
+							if(this.hoverQueue.length>0){
+								this.clickElement(this.hoverQueue[this.hoverQueue.length-1],this.str_hover_mf);
+								this.hoverQueue=[];
+							}
+						}),
+						this.hoverTimeout
+					);
 					//--------------------------------------------------------------------------------
 				},
 				clickElement:function(e,str_mf){
