@@ -2,8 +2,8 @@ Buildfile: c:\Users\ockert\dev\mdx\wid\svg\test\deployment\build_core.xml
 
 deploy:
      [copy] Copying 46 files to c:\Users\ockert\dev\mdx\wid\svg\test\deployment
+     [copy] Copying 1 file to c:\Users\ockert\dev\mdx\wid\svg\test\deployment\model\lib\userlib
 
 BUILD SUCCESSFUL
 Total time: 0 seconds
-
 
