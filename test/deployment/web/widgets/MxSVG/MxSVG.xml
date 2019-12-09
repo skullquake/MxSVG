@@ -6,96 +6,107 @@
 	<properties>
 
 		<property key="str_click_left_single_mf" type="string" required="false">
-			<caption>Left Single Click MF</caption>
+			<caption>Left Single Click MF[opt]</caption>
 			<category>Interaction</category>
 			<description>Fully Qualified Single Left Click Microflow.</description>
 		</property>
 		<property key="str_click_left_double_mf" type="string" required="false">
-			<caption>Left Double Click MF</caption>
+			<caption>Left Double Click MF[opt]</caption>
 			<category>Interaction</category>
 			<description>Fully Qualified Double Left Click Microflow.</description>
 		</property>
 		<property key="str_click_right_single_mf" type="string" required="false">
-			<caption>Right Single Click MF</caption>
+			<caption>Right Single Click MF[opt]</caption>
 			<category>Interaction</category>
 			<description>Fully Qualified Single Right Click Microflow.</description>
 		</property>
 		<property key="str_click_right_double_mf" type="string" required="false">
-			<caption>Right Double Click MF</caption>
+			<caption>Right Double Click MF[opt]</caption>
 			<category>Interaction</category>
 			<description>Fully Qualified Double Right Click Microflow.</description>
 		</property>
 		<property key="int_doublClickTimeout" type="integer" required="true" defaultValue="250">
-			<caption>Double Click Timeout</caption>
+			<caption>Double Click Timeout[opt]</caption>
 			<category>Interaction</category>
 			<description>Double Click Timeout in Milliseconds</description>
 		</property>
 
 		<property key="str_hover_mf" type="string" required="false">
-			<caption>Hover MF</caption>
+			<caption>Hover MF[opt]</caption>
 			<category>Interaction</category>
 			<description>Fully Qualified Hover Microflow.</description>
 		</property>
 		<property key="int_hoverTimeout" type="integer" required="true" defaultValue="250">
-			<caption>Hover Timeout</caption>
+			<caption>Hover Timeout[opt]</caption>
 			<category>Interaction</category>
 			<description>Hover Timeout in Milliseconds</description>
 		</property>
 
 		<property key="str_click_entity" type="string" required="false">
-			<caption>Click Entity</caption>
+			<caption>Click Entity[req]</caption>
 			<category>Interaction</category>
 			<description>Fully Qualified Click Entity Name</description>
 		</property>
 		<property key="str_click_assoc" type="string" required="false">
-			<caption>Click Entity Association</caption>
+			<caption>Click Entity-SVG Association[req]</caption>
 			<category>Interaction</category>
 			<description>Fully Qualified Click Entity Association</description>
 		</property>
+		<property key="str_click_svgholder_assoc" type="string" required="false">
+			<caption>Data Entity-SVGHolder Association[opt]</caption>
+			<category>Data</category>
+			<description>Fully Qualified Click-SVGHolder Entity Association</description>
+		</property>
+
 		<property key="str_click_entity_id_attr" type="string" required="false">
-			<caption>Click Entity Id Attribute</caption>
+			<caption>Click Entity Id Attribute[opt]</caption>
 			<category>Interaction</category>
 			<description>Click Entity Id Attribute to Populate</description>
 		</property>
 		<property key="str_click_entity_class_attr" type="string" required="false">
-			<caption>Click Entity Class Attribute</caption>
+			<caption>Click Entity Class Attribute[opt]</caption>
 			<category>Interaction</category>
 			<description>Click Entity Class Attribute to Populate</description>
 		</property>
 
+		<property key="str_filedocument_path" type="string" required="false">
+			<caption>FileDocument Path[opt]</caption>
+			<category>Data</category>
+			<description>Fully Qualified FileDocument Path</description>
+		</property>
 		<property key="str_data_entity" type="string" required="false">
-			<caption>Data Entity</caption>
+			<caption>Data Entity[opt]</caption>
 			<category>Data</category>
 			<description>Fully Qualified Data Entity Name</description>
 		</property>
 		<property key="str_data_assoc" type="string" required="false">
-			<caption>Data Entity Association</caption>
+			<caption>Data Entity Association[opt]</caption>
 			<category>Data</category>
 			<description>Fully Qualified Data Entity Association</description>
 		</property>
 		<property key="str_data_entity_id_attr" type="string" required="false">
-			<caption>Data Entity Id Attribute</caption>
+			<caption>Data Entity Id Attribute[opt]</caption>
 			<category>Data</category>
 			<description>Data Entity Id Attribute to Query by</description>
 		</property>
 		<property key="str_data_entity_class_attr" type="string" required="false">
-			<caption>Data Entity Class Attribute</caption>
+			<caption>Data Entity Class Attribute[opt]</caption>
 			<category>Data</category>
 			<description>Data Entity Class Attribute to Query by</description>
 		</property>
 		<property key="str_data_entity_fill_attr" type="string" required="false">
-			<caption>Data Entity Fill Attribute</caption>
+			<caption>Data Entity Fill Attribute[opt]</caption>
 			<category>Data</category>
 			<description>Data Entity Fill Attribute</description>
 		</property>
 
 		<property key="str_highlightcolor_correlated" type="string" required="false" defaultValue="rgba(0,255,0,0.5)">
-			<caption>Highlight Color Correlated</caption>
+			<caption>Highlight Color Correlated[opt]</caption>
 			<category>UX</category>
 			<description>Highlight Color for Correlated Elements</description>
 		</property>
 		<property key="str_highlightcolor_uncorrelated" type="string" required="false" defaultValue="rgba(255,0,0,0.5)">
-			<caption>Highlight Color Uncorrelated</caption>
+			<caption>Highlight Color Uncorrelated[opt]</caption>
 			<category>UX</category>
 			<description>Highlight Color for Uncorrelated Elements</description>
 		</property>

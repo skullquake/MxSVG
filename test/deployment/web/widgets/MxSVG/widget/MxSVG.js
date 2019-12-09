@@ -76,7 +76,9 @@ require(
 				str_click_entity_id_attr:null,
 				str_click_entity_class_attr:null,
 				str_click_assoc:null,
+				str_click_svgholder_assoc:null,
 				//------------------------------
+				str_filedocument_path:null,
 				str_data_entity:null,
 				str_data_assoc:null,
 				str_data_entity_id_attr:null,
@@ -95,6 +97,8 @@ require(
 				bool_alreadyClicked:null,
 				int_doubleClickTimeout:null,
 				int_hoverTimeout:null,
+				obj_filedocument:null,
+				obj_holder:null,
 				//------------------------------
 				constructor:function(){
 					this._handles=[];
@@ -208,11 +212,11 @@ require(
 						));
 					}
 					this._updateRendering(callback);
-					this._executeCallback(callback, "update");
+					this._executeCallback(callback,"update");
 				},
-				resize: function (box) {
+				resize:function(box){
 				},
-				uninitialize: function () {
+				uninitialize:function(){
 				},
 				destroy:function () {
 					console.log(this.evt);//make sure events are cleaned up
@@ -221,65 +225,133 @@ require(
 					if(this._contextObj!==null){
 						this.loaded=true;
 						dojo.empty(this.dom_svg);//intermediate fix for replication on update
-						var fileurl="/file?guid="+this._contextObj.getGuid()+"&changeDate="+(new Date().getTime());
-						this.dom_svg.src=fileurl;
-						d3.xml(fileurl)
-						.then(
-							dojo.hitch(
-								this,
-								function(data){
-									dojoStyle.set(this.domNode,"display","block");
-									d3.select(this.dom_svg).node().append(data.documentElement)
-									this.svg=d3.select(dojo.query('svg',this.dom_svg)[0]);
-									var svg=this.svg;
-									//setup d3 zoom
-									this.svg
-										.attr("width","100%")
-										.attr("height","100%")
-										.call(d3.zoom().on("zoom",function(){
-											svg.attr("transform",d3.event.transform)
-										}))
-										.append("g")
-									//no d3 zoom on double click (https://bl.ocks.org/anonymous/42745557a8602692d9dc98c33a327d29)
-									this.svg.on(
-										"dblclick.zoom",
-										null
-									);
-									//d3 remove context menu
-									this.svg
-									.on('contextmenu',
-										function(){ 
-											d3.event.preventDefault();
-										}
-									);
-									//setup data entities
-									new Promise((resolve,reject)=>{
-										mx.data.get({
-											guid:this._contextObj.getGuid(),
-											path:this.str_data_assoc,
-											filter:{
-												offset:0,
-												amount:4096
-											},
-											callback:function(objs){
-												resolve(objs);
-											},
-											error:function(e){
-												reject(e);
-											}
-										});
-
+						new Promise((resolve,reject)=>{
+							if(this.str_filedocument_path!=null&&this.str_filedocument_path!=''){
+								this.obj_holder=this._contextObj;
+								mx.data.get({
+									guid:this._contextObj.getGuid(),
+									path:this.str_filedocument_path,
+									filter:{
+										offset:0,
+										amount:1
+									},
+									callback:dojo.hitch(this,function(fileobj){
+										fileobj=fileobj.length>0?fileobj[0]:fileobj;//hdl arr
+										resolve(fileobj);
+									}),
+									error:dojo.hitch(this,function(e){
+										//this.obj_filedocument=this._contextObj;
+										reject(e);
 									})
-									.then(
-										dojo.hitch(this,function(arr_obj){
-											if(this.str_data_entity_fill_attr){
-												try{
-													arr_obj.forEach(dojo.hitch(this,function(obj,objidx){
-														var str_color=obj.get(this.str_data_entity_fill_attr);
-														if(
-															str_color!=null&&
-															str_color!=''
-														){
+								});
+							}else{
+								resolve(this._contextObj);
+							}
+						})
+						.then(
+							dojo.hitch(this,function(fileobj){
+								this.obj_filedocument=fileobj;
+								var fileurl="/file?guid="+this.obj_filedocument.getGuid()+"&changeDate="+(new Date().getTime());
+								d3.xml(fileurl)
+								.then(
+									dojo.hitch(
+										this,
+										function(data){
+											dojoStyle.set(this.domNode,"display","block");
+											d3.select(this.dom_svg).node().append(data.documentElement)
+											this.svg=d3.select(dojo.query('svg',this.dom_svg)[0]);
+											var svg=this.svg;
+											//setup d3 zoom
+											this.svg
+												.attr("width","100%")
+												.attr("height","100%")
+												.call(d3.zoom().on("zoom",function(){
+													svg.attr("transform",d3.event.transform)
+												}))
+												.append("g")
+											//no d3 zoom on double click (https://bl.ocks.org/anonymous/42745557a8602692d9dc98c33a327d29)
+											this.svg.on(
+												"dblclick.zoom",
+												null
+											);
+											//d3 remove context menu
+											this.svg
+											.on('contextmenu',
+												function(){ 
+													d3.event.preventDefault();
+												}
+											);
+											//setup data entities
+											new Promise((resolve,reject)=>{
+												mx.data.get({
+													//guid:this._contextObj.getGuid(),
+													guid:this.obj_filedocument.getGuid(),
+													path:this.str_data_assoc,
+													filter:{
+														offset:0,
+														amount:4096
+													},
+													callback:dojo.hitch(this,function(objs){
+														resolve(objs);
+													}),
+													error:dojo.hitch(this,function(e){
+														reject(e);
+													})
+												});
+
+											})
+											.then(
+												dojo.hitch(this,function(arr_obj){
+													if(this.str_data_entity_fill_attr){
+														try{
+															arr_obj.forEach(dojo.hitch(this,function(obj,objidx){
+																var str_color=obj.get(this.str_data_entity_fill_attr);
+																if(
+																	str_color!=null&&
+																	str_color!=''
+																){
+																	var query='';
+																	if(
+																		obj.get(this.str_data_entity_class_attr)!=null&&
+																		obj.get(this.str_data_entity_class_attr)!=''
+																	){
+																		query+='.'+obj.get(this.str_data_entity_class_attr)
+																	}
+																	if(
+																		obj.get(this.str_data_entity_id_attr)!=null&&
+																		obj.get(this.str_data_entity_id_attr)!=''
+																	){
+																		query+='#'+obj.get(this.str_data_entity_id_attr)
+																	}
+																	if(query!=''){
+																		var arr_nod=dojo.query(this.dom_svg).query(query);
+																		arr_nod.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
+																			$(obj_nod).css('fill',str_color);
+																		}));
+																	}
+																}else{
+																	console.error(
+																		this.id+
+																		': '+
+																		this.str_data_entity_fill_attr+
+																		' null|empty'
+																	);
+																}
+															}));
+														}catch(e){
+															console.error(this.id+':'+e.toString());
+														}
+													}
+													//hover
+													if(
+														(this.str_highlightcolor_correlated!=null||this.str_highlightcolor_correlated!='')&&
+														!(
+															this.str_data_entity_id_attr==null&&
+															this.str_data_entity_class_attr==null
+														)
+													){
+														this.arr_nod_correlated=[];
+														arr_obj.forEach(dojo.hitch(this,function(obj,objidx){
 															var query='';
 															if(
 																obj.get(this.str_data_entity_class_attr)!=null&&
@@ -294,123 +366,86 @@ require(
 																query+='#'+obj.get(this.str_data_entity_id_attr)
 															}
 															if(query!=''){
-																var arr_nod=dojo.query(this.dom_svg).query(query);
-																arr_nod.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
-																	$(obj_nod).css('fill',str_color);
+																var arr_nod_query=dojo.query(this.dom_svg).query(query);
+																arr_nod_query.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
+																	this.arr_nod_correlated.push(obj_nod);
+																	obj_nod.oldfill=$(obj_nod).css('fill');
+																	this.arr_evt.push(on(
+																		obj_nod,
+																		mouse.enter,
+																		dojo.hitch(this,function(evt){
+																			$(evt.target).css('fill',this.str_highlightcolor_correlated);
+																			//handle hover server exec
+																			this.hover(evt);
+																		})
+																	));
+																	this.arr_evt.push(on(
+																		obj_nod,
+																		mouse.leave,
+																		dojo.hitch(this,function(evt){
+																			$(evt.target).css('fill',evt.target.oldfill);
+																		})
+																	));
+
 																}));
 															}
-														}else{
-															console.error(
-																this.id+
-																': '+
-																this.str_data_entity_fill_attr+
-																' null|empty'
-															);
-														}
-													}));
-												}catch(e){
-													console.error(this.id+':'+e.toString());
-												}
-											}
-											//hover
-											if(
-												(this.str_highlightcolor_correlated!=null||this.str_highlightcolor_correlated!='')&&
-												!(
-													this.str_data_entity_id_attr==null&&
-													this.str_data_entity_class_attr==null
-												)
-											){
-												this.arr_nod_correlated=[];
-												arr_obj.forEach(dojo.hitch(this,function(obj,objidx){
-													var query='';
-													if(
-														obj.get(this.str_data_entity_class_attr)!=null&&
-														obj.get(this.str_data_entity_class_attr)!=''
-													){
-														query+='.'+obj.get(this.str_data_entity_class_attr)
-													}
-													if(
-														obj.get(this.str_data_entity_id_attr)!=null&&
-														obj.get(this.str_data_entity_id_attr)!=''
-													){
-														query+='#'+obj.get(this.str_data_entity_id_attr)
-													}
-													if(query!=''){
-														var arr_nod_query=dojo.query(this.dom_svg).query(query);
-														arr_nod_query.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
-															this.arr_nod_correlated.push(obj_nod);
-															obj_nod.oldfill=$(obj_nod).css('fill');
-															this.arr_evt.push(on(
-																obj_nod,
-																mouse.enter,
-																dojo.hitch(this,function(evt){
-																	$(evt.target).css('fill',this.str_highlightcolor_correlated);
-																	//handle hover server exec
-																	this.hover(evt);
-																})
-															));
-															this.arr_evt.push(on(
-																obj_nod,
-																mouse.leave,
-																dojo.hitch(this,function(evt){
-																	$(evt.target).css('fill',evt.target.oldfill);
-																})
-															));
-
 														}));
-													}
-												}));
-												//apply hover for uncorrelated...
-												if(
-													this.str_highlightcolor_uncorrelated!=null&&
-													this.str_highlightcolor_uncorrelated!=''
-												){
-													this.arr_nod_uncorrelated=[];
-													this.arr_nod_all=dojo.query('rect',this.dom_svg);
-													this.arr_nod_all.forEach(dojo.hitch(this,function(nod,nodidx){
+														//apply hover for uncorrelated...
 														if(
-															this.arr_nod_correlated.find(
-																function(nod_uncorrelated,nod_uncorrelated_idx){
-																if(nod_uncorrelated==nod){
-																    return true;
-																}else{
-																    return false;
-																}
-															    }
-															)
+															this.str_highlightcolor_uncorrelated!=null&&
+															this.str_highlightcolor_uncorrelated!=''
 														){
+															this.arr_nod_uncorrelated=[];
+															this.arr_nod_all=dojo.query('rect',this.dom_svg);
+															this.arr_nod_all.forEach(dojo.hitch(this,function(nod,nodidx){
+																if(
+																	this.arr_nod_correlated.find(
+																		function(nod_uncorrelated,nod_uncorrelated_idx){
+																		if(nod_uncorrelated==nod){
+																		    return true;
+																		}else{
+																		    return false;
+																		}
+																	    }
+																	)
+																){
+																}else{
+																	this.arr_nod_uncorrelated.push(nod);
+																}
+															}));
+															this.arr_nod_uncorrelated.forEach(dojo.hitch(this,function(obj_nod,obj_nodidx){
+																//$(nod).css('fill','yellow');
+																obj_nod.oldfill=$(obj_nod).css('fill');
+																this.arr_evt.push(on(
+																	obj_nod,
+																	mouse.enter,
+																	dojo.hitch(this,function(evt){
+																		$(evt.target).css('fill',this.str_highlightcolor_uncorrelated);
+																	})
+																));
+																this.arr_evt.push(on(
+																	obj_nod,
+																	mouse.leave,
+																	dojo.hitch(this,function(evt){
+																		$(evt.target).css('fill',evt.target.oldfill);
+																	})
+																));
+															}));
 														}else{
-															this.arr_nod_uncorrelated.push(nod);
 														}
-													}));
-													this.arr_nod_uncorrelated.forEach(dojo.hitch(this,function(obj_nod,obj_nodidx){
-														//$(nod).css('fill','yellow');
-														obj_nod.oldfill=$(obj_nod).css('fill');
-														this.arr_evt.push(on(
-															obj_nod,
-															mouse.enter,
-															dojo.hitch(this,function(evt){
-																$(evt.target).css('fill',this.str_highlightcolor_uncorrelated);
-															})
-														));
-														this.arr_evt.push(on(
-															obj_nod,
-															mouse.leave,
-															dojo.hitch(this,function(evt){
-																$(evt.target).css('fill',evt.target.oldfill);
-															})
-														));
-													}));
-												}else{
-												}
-											}
-										}),
-										dojo.hitch(this,function(err){
-											alert(err);
-										})
-									);
-								}
-							)
+													}
+												}),
+												dojo.hitch(this,function(err){
+													alert(err);
+												})
+											);
+										}
+									)
+								);
+							}),
+							dojo.hitch(this,function(e){
+								mx.ui.error(e.toString());
+							})
 						);
 					} else {
 						dojoStyle.set(this.domNode,"display","none");
@@ -467,7 +502,8 @@ require(
 											callback:dojo.hitch(this,function(obj){
 												obj.addReference(
 													this.str_click_assoc,
-													this._contextObj.getGuid()
+													//this._contextObj.getGuid()
+													this.obj_filedocument.getGuid()
 												);
 												resolve(obj)
 											}),
@@ -497,6 +533,21 @@ require(
 									if(tgtclass!=null){
 										obj.set(this.str_click_entity_class_attr,tgtclass);
 									}else{
+									}
+								}
+								//data holder when not using SVG directly
+								if(
+									this.str_click_svgholder_assoc!=null&&
+									this.str_click_svgholder_assoc!=''&&
+									this.obj_holder!=null
+								){
+									try{
+										obj.addReference(
+											this.str_click_svgholder_assoc,
+											this.obj_holder.getGuid()
+										);
+									}catch(e){
+										console.error(this.id+":"+e.toString());
 									}
 								}
 								//this._execMf(this.str_click_left_single_mf,obj.getGuid(),dojo.hitch(this,function(ret){}))
