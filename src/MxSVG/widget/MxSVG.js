@@ -224,7 +224,21 @@ require(
 				_updateRendering:function(callback){
 					if(this._contextObj!==null){
 						this.loaded=true;
-						dojo.empty(this.dom_svg);//intermediate fix for replication on update
+						//dojo.empty(this.dom_svg);//intermediate fix for replication on update
+						if(this.obj_filedocument==null){
+							this.setupSVG();
+						}else{
+							this.setupSVGData();
+						}
+					} else {
+						dojoStyle.set(this.domNode,"display","none");
+						//dojo.empty(this.dom_svg);
+						this.obj_filedocument=null;
+						this.obj_holder=null;
+					}
+					this._executeCallback(callback,"_updateRendering");
+				},
+				setupSVG:function(){
 						new Promise((resolve,reject)=>{
 							if(this.str_filedocument_path!=null&&this.str_filedocument_path!=''){
 								this.obj_holder=this._contextObj;
@@ -281,6 +295,18 @@ require(
 													d3.event.preventDefault();
 												}
 											);
+											this.setupSVGData();
+										}
+									)
+								);
+							}),
+							dojo.hitch(this,function(e){
+								mx.ui.error(e.toString());
+							})
+						);
+
+				},
+				setupSVGData:function(){
 											//setup data entities
 											new Promise((resolve,reject)=>{
 												mx.data.get({
@@ -439,19 +465,7 @@ require(
 													alert(err);
 												})
 											);
-										}
-									)
-								);
-							}),
-							dojo.hitch(this,function(e){
-								mx.ui.error(e.toString());
-							})
-						);
-					} else {
-						dojoStyle.set(this.domNode,"display","none");
-						dojo.empty(this.dom_svg);
-					}
-					this._executeCallback(callback,"_updateRendering");
+
 				},
 				clickLMBS:function(e){
 					this.clickElement(e,this.str_click_left_single_mf);
