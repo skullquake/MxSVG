@@ -83,7 +83,10 @@ require(
 				str_data_assoc:null,
 				str_data_entity_id_attr:null,
 				str_data_entity_class_attr:null,
-				str_data_entity_fill_attr:null,
+				str_userdata_entity:null,
+				str_userdata_data_assoc:null,
+				str_userdata_svgholder_assoc:null,
+				str_userdata_fill_attr:null,
 				//------------------------------
 				str_highlightcolor_correlated:null,
 				str_highlightcolor_uncorrelated:null,
@@ -307,165 +310,238 @@ require(
 
 				},
 				setupSVGData:function(){
-											//setup data entities
-											new Promise((resolve,reject)=>{
-												mx.data.get({
-													//guid:this._contextObj.getGuid(),
-													guid:this.obj_filedocument.getGuid(),
-													path:this.str_data_assoc,
-													filter:{
-														offset:0,
-														amount:4096
-													},
-													callback:dojo.hitch(this,function(objs){
-														resolve(objs);
-													}),
-													error:dojo.hitch(this,function(e){
-														reject(e);
-													})
-												});
+					//setup data entities
+					new Promise((resolve,reject)=>{
+						mx.data.get({
+							//guid:this._contextObj.getGuid(),
+							guid:this.obj_filedocument.getGuid(),
+							path:this.str_data_assoc,
+							filter:{
+								offset:0,
+								amount:4096
+							},
+							callback:dojo.hitch(this,function(objs){
+								resolve(objs);
+							}),
+							error:dojo.hitch(this,function(e){
+								reject(e);
+							})
+						});
 
-											})
-											.then(
-												dojo.hitch(this,function(arr_obj){
-													if(this.str_data_entity_fill_attr){
-														try{
-															arr_obj.forEach(dojo.hitch(this,function(obj,objidx){
-																var str_color=obj.get(this.str_data_entity_fill_attr);
-																if(
-																	str_color!=null&&
-																	str_color!=''
-																){
-																	var query='';
-																	if(
-																		obj.get(this.str_data_entity_class_attr)!=null&&
-																		obj.get(this.str_data_entity_class_attr)!=''
-																	){
-																		query+='.'+obj.get(this.str_data_entity_class_attr)
-																	}
-																	if(
-																		obj.get(this.str_data_entity_id_attr)!=null&&
-																		obj.get(this.str_data_entity_id_attr)!=''
-																	){
-																		query+='#'+obj.get(this.str_data_entity_id_attr)
-																	}
-																	if(query!=''){
-																		var arr_nod=dojo.query(this.dom_svg).query(query);
-																		arr_nod.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
-																			$(obj_nod).css('fill',str_color);
-																		}));
-																	}
-																}else{
-																	console.error(
-																		this.id+
-																		': '+
-																		this.str_data_entity_fill_attr+
-																		' null|empty'
-																	);
-																}
-															}));
-														}catch(e){
-															console.error(this.id+':'+e.toString());
-														}
-													}
-													//hover
-													if(
-														(this.str_highlightcolor_correlated!=null||this.str_highlightcolor_correlated!='')&&
-														!(
-															this.str_data_entity_id_attr==null&&
-															this.str_data_entity_class_attr==null
-														)
-													){
-														this.arr_nod_correlated=[];
-														arr_obj.forEach(dojo.hitch(this,function(obj,objidx){
-															var query='';
-															if(
-																obj.get(this.str_data_entity_class_attr)!=null&&
-																obj.get(this.str_data_entity_class_attr)!=''
-															){
-																query+='.'+obj.get(this.str_data_entity_class_attr)
-															}
-															if(
-																obj.get(this.str_data_entity_id_attr)!=null&&
-																obj.get(this.str_data_entity_id_attr)!=''
-															){
-																query+='#'+obj.get(this.str_data_entity_id_attr)
-															}
-															if(query!=''){
-																var arr_nod_query=dojo.query(this.dom_svg).query(query);
-																arr_nod_query.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
-																	this.arr_nod_correlated.push(obj_nod);
-																	obj_nod.oldfill=$(obj_nod).css('fill');
-																	this.arr_evt.push(on(
-																		obj_nod,
-																		mouse.enter,
-																		dojo.hitch(this,function(evt){
-																			$(evt.target).css('fill',this.str_highlightcolor_correlated);
-																			//handle hover server exec
-																			this.hover(evt);
-																		})
-																	));
-																	this.arr_evt.push(on(
-																		obj_nod,
-																		mouse.leave,
-																		dojo.hitch(this,function(evt){
-																			$(evt.target).css('fill',evt.target.oldfill);
-																		})
-																	));
-
-																}));
-															}
-														}));
-														//apply hover for uncorrelated...
-														if(
-															this.str_highlightcolor_uncorrelated!=null&&
-															this.str_highlightcolor_uncorrelated!=''
-														){
-															this.arr_nod_uncorrelated=[];
-															this.arr_nod_all=dojo.query('rect',this.dom_svg);
-															this.arr_nod_all.forEach(dojo.hitch(this,function(nod,nodidx){
-																if(
-																	this.arr_nod_correlated.find(
-																		function(nod_uncorrelated,nod_uncorrelated_idx){
-																		if(nod_uncorrelated==nod){
-																		    return true;
-																		}else{
-																		    return false;
-																		}
-																	    }
-																	)
-																){
-																}else{
-																	this.arr_nod_uncorrelated.push(nod);
-																}
-															}));
-															this.arr_nod_uncorrelated.forEach(dojo.hitch(this,function(obj_nod,obj_nodidx){
-																//$(nod).css('fill','yellow');
-																obj_nod.oldfill=$(obj_nod).css('fill');
-																this.arr_evt.push(on(
-																	obj_nod,
-																	mouse.enter,
-																	dojo.hitch(this,function(evt){
-																		$(evt.target).css('fill',this.str_highlightcolor_uncorrelated);
-																	})
-																));
-																this.arr_evt.push(on(
-																	obj_nod,
-																	mouse.leave,
-																	dojo.hitch(this,function(evt){
-																		$(evt.target).css('fill',evt.target.oldfill);
-																	})
-																));
-															}));
-														}else{
-														}
-													}
-												}),
-												dojo.hitch(this,function(err){
-													alert(err);
-												})
+					})
+					.then(
+						dojo.hitch(this,function(arr_obj){
+							if(this.str_data_entity_fill_attr){
+								try{
+									arr_obj.forEach(dojo.hitch(this,function(obj,objidx){
+										var str_color=obj.get(this.str_data_entity_fill_attr);
+										if(
+											str_color!=null&&
+											str_color!=''
+										){
+											var query='';
+											if(
+												obj.get(this.str_data_entity_class_attr)!=null&&
+												obj.get(this.str_data_entity_class_attr)!=''
+											){
+												query+='.'+obj.get(this.str_data_entity_class_attr)
+											}
+											if(
+												obj.get(this.str_data_entity_id_attr)!=null&&
+												obj.get(this.str_data_entity_id_attr)!=''
+											){
+												query+='#'+obj.get(this.str_data_entity_id_attr)
+											}
+											if(query!=''){
+												var arr_nod=dojo.query(this.dom_svg).query(query);
+												arr_nod.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
+													$(obj_nod).css('fill',str_color);
+												}));
+											}
+										}else{
+											console.error(
+												this.id+
+												': '+
+												this.str_data_entity_fill_attr+
+												' null|empty'
 											);
+										}
+									}));
+								}catch(e){
+									console.error(this.id+':'+e.toString());
+								}
+							}
+							//hover
+							if(
+								(this.str_highlightcolor_correlated!=null||this.str_highlightcolor_correlated!='')&&
+								!(
+									this.str_data_entity_id_attr==null&&
+									this.str_data_entity_class_attr==null
+								)
+							){
+								this.arr_nod_correlated=[];
+								arr_obj.forEach(dojo.hitch(this,function(obj,objidx){
+									var query='';
+									if(
+										obj.get(this.str_data_entity_class_attr)!=null&&
+										obj.get(this.str_data_entity_class_attr)!=''
+									){
+										query+='.'+obj.get(this.str_data_entity_class_attr)
+									}
+									if(
+										obj.get(this.str_data_entity_id_attr)!=null&&
+										obj.get(this.str_data_entity_id_attr)!=''
+									){
+										query+='#'+obj.get(this.str_data_entity_id_attr)
+									}
+									if(query!=''){
+										var arr_nod_query=dojo.query(this.dom_svg).query(query);
+										arr_nod_query.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
+											this.arr_nod_correlated.push(obj_nod);
+											obj_nod.oldfill=$(obj_nod).css('fill');
+											this.arr_evt.push(on(
+												obj_nod,
+												mouse.enter,
+												dojo.hitch(this,function(evt){
+													$(evt.target).css('fill',this.str_highlightcolor_correlated);
+													//handle hover server exec
+													this.hover(evt);
+												})
+											));
+											this.arr_evt.push(on(
+												obj_nod,
+												mouse.leave,
+												dojo.hitch(this,function(evt){
+													$(evt.target).css('fill',evt.target.oldfill);
+												})
+											));
 
+										}));
+									}
+								}));
+								//apply hover for uncorrelated...
+								if(
+									this.str_highlightcolor_uncorrelated!=null&&
+									this.str_highlightcolor_uncorrelated!=''
+								){
+									this.arr_nod_uncorrelated=[];
+									this.arr_nod_all=dojo.query('rect',this.dom_svg);
+									this.arr_nod_all.forEach(dojo.hitch(this,function(nod,nodidx){
+										if(
+											this.arr_nod_correlated.find(
+												function(nod_uncorrelated,nod_uncorrelated_idx){
+												if(nod_uncorrelated==nod){
+												    return true;
+												}else{
+												    return false;
+												}
+											    }
+											)
+										){
+										}else{
+											this.arr_nod_uncorrelated.push(nod);
+										}
+									}));
+									this.arr_nod_uncorrelated.forEach(dojo.hitch(this,function(obj_nod,obj_nodidx){
+										//$(nod).css('fill','yellow');
+										obj_nod.oldfill=$(obj_nod).css('fill');
+										this.arr_evt.push(on(
+											obj_nod,
+											mouse.enter,
+											dojo.hitch(this,function(evt){
+												$(evt.target).css('fill',this.str_highlightcolor_uncorrelated);
+											})
+										));
+										this.arr_evt.push(on(
+											obj_nod,
+											mouse.leave,
+											dojo.hitch(this,function(evt){
+												$(evt.target).css('fill',evt.target.oldfill);
+											})
+										));
+									}));
+								}else{
+								}
+							}
+							return new Promise((resolve,reject)=>{resolve()});
+						}),
+						dojo.hitch(this,function(err){
+							alert(err);
+						})
+					)
+					.then(dojo.hitch(this,function(){
+						if(
+							this.str_userdata_data_assoc!=null&&
+							this.str_userdata_data_assoc!=''&&
+							this.str_userdata_svgholder_assoc!=null&&
+							this.str_userdata_svgholder_assoc!=''&&
+							this.str_userdata_fill_attr!=null&&
+							this.str_userdata_fill_attr!=''
+						){
+							var references={};
+							references[this.str_userdata_data_assoc]={};
+							var xpath="//"+this.str_userdata_entity+"["+this.str_userdata_svgholder_assoc+"="+this._contextObj.getGuid()+"]";
+							console.log(references);
+							console.log(xpath);
+							mx.data.get({
+								//only by xpath can you retrieve children
+								xpath:xpath,
+								filter:{
+									offset:0,
+									amount:4096,
+									references:references
+								},
+								callback:dojo.hitch(this,function(arr_userdata){
+									window.arr_userdata=arr_userdata;
+									arr_userdata.forEach(dojo.hitch(this,function(obj,objidx){
+										var arr_children=obj.getChildren(this.str_userdata_data_assoc);
+										if(arr_children.length>0){
+											var obj_child=arr_children[0];
+											var str_color=obj.get(this.str_userdata_fill_attr);
+											if(
+												str_color!=null&&
+												str_color!=''
+											){
+												var query='';
+												if(
+													obj.get(this.str_data_entity_class_attr)!=null&&
+													obj.get(this.str_data_entity_class_attr)!=''
+												){
+													query+='.'+obj_child.get(this.str_data_entity_class_attr)
+												}
+												if(
+													obj_child.get(this.str_data_entity_id_attr)!=null&&
+													obj_child.get(this.str_data_entity_id_attr)!=''
+												){
+													query+='#'+obj_child.get(this.str_data_entity_id_attr)
+												}
+												if(query!=''){
+													var arr_nod=dojo.query(this.dom_svg).query(query);
+													arr_nod.forEach(dojo.hitch(this,function(obj_nod,obj_nod_idx){
+														$(obj_nod).css('fill',str_color);
+													}));
+												}
+											}else{
+												console.error(
+													this.id+
+													': '+
+													this.str_data_entity_fill_attr+
+													' null|empty'
+												);
+											}
+										}else{
+											console.log('-------------------')
+											console.log('No Child')
+											console.log('-------------------')
+										}
+									}));
+								}),
+								error:dojo.hitch(this,function(e){
+									console.error(e);
+								})
+							});
+						}else{}
+					}))
 				},
 				clickLMBS:function(e){
 					this.clickElement(e,this.str_click_left_single_mf);
